@@ -1,15 +1,18 @@
-.. include:: ../_includes/toplevel.inc
+.. include:: /_includes/toplevel.inc
 
 .. The links to the release are hard coded in downloads-release.inc.
 .. The nightly builds are linked in downloads-nightly.inc.
 
-.. include:: ../_includes/downloads-release.inc
-.. include:: ../_includes/downloads-nightly.inc
+.. include:: /_includes/downloads-release.inc
+.. include:: /_includes/downloads-nightly.inc
 
 .. _download:
 
-Download the latest release of mCRL2
-====================================
+Download mCRL2
+==============
+
+Latest release
+--------------
 
 The mCRL2 toolkit can be run on a number of different platforms. For some
 platforms, precompiled binaries are available. The table below provides the
@@ -41,8 +44,13 @@ This package is currently maintained by Jorai Rijsdijk.
    The Windows release has received a minor fix on the 12th of July, 2021,
    which resolves not being able to open mcrl2ide from mcrl2-gui.
 
-Download a nightly build of mCRL2
-=================================
+Known issues
+************
+
+There are no major known issues at the moment.
+
+Nightly build
+-------------
 
 Directly installable packages of the mCRL2 toolset are constructed every night.
 They are available here.
@@ -67,13 +75,6 @@ They are available here.
 
 If you are using a Linux distribution that is not listed, you may wish to try
 :ref:`compiling mCRL2 yourself <build>`.
-
-
-Known issues
-------------
-
-There are no major known issues at the moment.
-
 
 
 Previous releases
