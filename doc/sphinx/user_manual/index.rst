@@ -2,7 +2,7 @@
 
 .. title:: Home
 
-.. image:: /_templates/mcrl2/static/mcrl2.png
+.. image:: /_static/mcrl2.png
    :align: center
    :class: frontpage-logo
 
@@ -15,7 +15,6 @@
 
 .. list-table::
    :class: frontpage-table
-   :widths: 40,60
 
    * - .. image:: /_static/book.*
           :align: left
@@ -39,10 +38,10 @@
 .. note::
 
    The latest release, mCRL2 202106.0, is now available from the download page.
-   This version sees a number of UI improvements and the addition of 
-   coupled simulation that can now be checked using the ltscompare tool. 
-   Furthermore, this release contains a number of performance improvements 
-   and bug fixes. 
+   This version sees a number of UI improvements and the addition of
+   coupled simulation that can now be checked using the ltscompare tool.
+   Furthermore, this release contains a number of performance improvements
+   and bug fixes.
    See the `changelog <https://github.com/mCRL2org/mCRL2/blob/master/CHANGES>`_
    for a detailed list of changes.
 
@@ -85,7 +84,6 @@
 
 .. list-table::
    :class: teamcity-blurb
-   :widths: 13,87
 
    * - .. image:: /_static/teamcity.*
           :width: 75
