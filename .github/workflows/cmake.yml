@@ -43,5 +43,5 @@ jobs:
     - name: Create and upload release
       run: |
         echo ${{ secrets.GITHUB_TOKEN }}  | gh auth login --with-token
-        gh release create $GITHUB_REF_NAME --title "mCRL2 $GITHUB_REF_NAME" --generate-notes
-        gh release upload $GITHUB_REF_NAME ${{github.workspace}}/build/stage/bin/*
+        gh release create latest --title "mCRL2 latest" --generate-notes
+        gh release upload latest ${{github.workspace}}/build/stage/bin/*
