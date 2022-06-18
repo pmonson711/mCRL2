@@ -40,8 +40,8 @@ jobs:
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C ${{env.BUILD_TYPE}}
 
-    - name: create release
-      run: gh release create $GITHUB_REF_NAME --title "mCRL2 $GITHUB_REF_NAME" --generate-notes
-
-    - name: upload release artifacts
-      run: gh release upload $GITHUB_REF_NAME ${{github.workspace}}/build/stage/bin/*
+    - name: Create and upload release
+      run: |
+        echo ${{ secrets.GITHUB_TOKEN }}  | gh auth login --with-token
+        gh release create $GITHUB_REF_NAME --title "mCRL2 $GITHUB_REF_NAME" --generate-notes
+        gh release upload $GITHUB_REF_NAME ${{github.workspace}}/build/stage/bin/*
