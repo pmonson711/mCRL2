@@ -42,6 +42,7 @@ jobs:
 
     - name: Create and upload release
       run: |
-        echo ${{ secrets.GH_RELEASER }}  | gh auth login --with-token
+        echo ${{ secrets.GH_RELEASER }} | gh auth login --with-token
+        tar czf ${{github.workspace}}/mcrl2-tools.tgz ${{github.workspace}}/build/stage/bin/*
         gh release create latest --title "mCRL2 latest" --generate-notes
-        gh release upload latest ${{github.workspace}}/build/stage/bin/*
+        gh release upload latest ${{github.workspace}}/mcrl2-tools.tgz
