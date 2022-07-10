@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <cassert>
 #include <set>
+#include <map>
 #include "mcrl2/lts/transition.h"
 #include "mcrl2/lts/lts_type.h"
 
@@ -93,6 +94,48 @@ class lts: public LTS_BASE
     // This allows tools to apply reductions assuming that these actions are hidden, but still provide
     // feedback, for instance using counter examples, using the original action name. 
     std::set<labels_size_type> m_hidden_label_set; 
+
+    // Auxiliary function. Rename the labels according to the action_rename_map;
+    void rename_labels(const std::map<labels_size_type, labels_size_type>& action_rename_map)
+    {
+      if (action_rename_map.size()>0)    // Check whether there is something to rename.
+      {
+        for(transition& t: m_transitions)
+        {
+          auto i = action_rename_map.find(t.label());
+          if (i!=action_rename_map.end())
+          { 
+            t=transition(t.from(),i->second,t.to());
+          }
+        }
+      }
+    }
+
+    // Auxiliary function. a is the partially hidden action label of which the original
+    // action label occurred at position i. 
+    // If label a exists at position j, set action_rename_map[i]:=j;
+    // if a does not occur, adapt the action labels by setting label i to j.
+    void store_action_label_to_be_renamed(const ACTION_LABEL_T& a, 
+                                          const labels_size_type i, 
+                                          std::map<labels_size_type, labels_size_type>& action_rename_map)
+    {
+      bool found=false;
+      for (labels_size_type j=0; !found && j< num_action_labels(); ++j)
+      {
+        if (a==action_label(j))
+        { 
+          if (i!=j)
+          {
+            action_rename_map[i]=j;
+          }
+          found=true;
+        }
+      }
+      if (!found) // a!=action_label(j) for any j, then rename action_label(i) to a. 
+      { 
+        set_action_label(i,a);
+      }
+    }
 
   public:
 
@@ -470,9 +513,15 @@ class lts: public LTS_BASE
       return (action==const_tau_label_index);
     }
 
+
     /** \brief Records all actions with a string that occurs in tau_actions internally.
-     *  \details After hiding actions, it checks whether action labels are
-     *           equal and merges actions with the same labels in the lts.
+     *  \details In case actions are partially hidden, e.g. action a is hidden in a|b
+     *           b is the result. If b is an existing label with index j, and a|b had
+     *           index i, every i is replaced by j. If there was no action b yet, the
+     *           action label a|b is replaced by the action label b.
+     *           Essential for the correctness is that hiding an action repeatedly in
+     *           a multiaction, has the same effect as hiding it once, which is a property
+     *           of hiding actions. 
      *  \param[in] tau_actions Vector with strings indicating which actions must be
      *       transformed to tau's */
     void record_hidden_actions(const std::vector<std::string>& tau_actions)
@@ -482,40 +531,61 @@ class lts: public LTS_BASE
         return;
       }
 
+      std::map<labels_size_type, labels_size_type> action_rename_map;
       for (labels_size_type i=0; i< num_action_labels(); ++i)
       {
         ACTION_LABEL_T a=action_label(i);
         a.hide_actions(tau_actions);
-        if (a==ACTION_LABEL_T())  
+        if (a==ACTION_LABEL_T::tau_action())  
         {
-          m_hidden_label_set.insert(i);
+          if (i!=const_tau_label_index)
+          {
+            m_hidden_label_set.insert(i);
+          }
         }
         else if (a!=action_label(i))
         {
-          set_action_label(i,a);  
+          /* In this the action_label i is changed by the tau_actions but not renamed to tau.
+             We check whether a maps onto another action label index. If yes, it is added to 
+             the rename map, and we explicitly rename transition labels with this label afterwards.
+             If no, we rename the action label.
+          */
+          store_action_label_to_be_renamed(a, i, action_rename_map);
         }
       }
+
+      rename_labels(action_rename_map);
     }
 
-    /** \brief Apply the recorded actions that are renamed to internal actions to the lts. 
-     *  \details After hiding actions, it checks whether action labels are
-     *           equal and merges actions with the same labels in the lts.
+    /** \brief Rename actions in the lts by hiding the actions in the vector tau_actions. 
+     *  \details Multiactions can be partially renamed. I.e. a|b becomes a if b is hidden.
+     *           In such a case the new action a is mapped onto an existing action a; if such
+     *           a label a does not exist, the action label a|b is renamed to a. 
      *  \param[in] tau_actions Vector with strings indicating which actions must be
      *       transformed to tau's */
-    void apply_hidden_actions(void)
+    void apply_hidden_actions(const std::vector<std::string>& tau_actions)
     {
-      if (m_hidden_label_set.size()>0)    // Check whether there is something to rename.
-      {
-        for(transition& t: m_transitions)
-        {
-          if (m_hidden_label_set.count(t.label()))
-          { 
-            t=transition(t.from(),tau_label_index(),t.to());
-          }
-        }
-        m_hidden_label_set.clear();       // Empty the hidden label set. 
+      if (tau_actions.size()==0)
+      { 
+        return;
       }
+      
+      std::map<labels_size_type, labels_size_type> action_rename_map;
+      for (labels_size_type i=0; i< num_action_labels(); ++i)
+      {
+        ACTION_LABEL_T a=action_label(i);
+        a.hide_actions(tau_actions);
+#ifndef NDEBUG
+        ACTION_LABEL_T b=a;
+        b.hide_actions(tau_actions);
+        assert(a==b); // hide_actions applied twice yields the same result as applying it once.
+#endif
+        store_action_label_to_be_renamed(a, i, action_rename_map);
+      }
+    
+      rename_labels(action_rename_map);
     }
+
     /** \brief Checks whether this LTS has state values associated with its states.
      * \retval true if the LTS has state information;
      * \retval false otherwise.
