@@ -43,6 +43,5 @@ jobs:
     - name: Create and upload release
       run: |
         echo ${{ secrets.GH_RELEASER }} | gh auth login --with-token
-        tar --directory=${{github.workspace}}/build/stage czf ${{github.workspace}}/mcrl2-tools.tgz *
-        gh release create latest --title "mCRL2 latest" --generate-notes
-        gh release upload latest ${{github.workspace}}/mcrl2-tools.tgz
+        tar --create --file ${{github.workspace}}/mcrl2-tools.tgz --gzip --directory=${{github.workspace}}/build/stage .
+        gh release upload latest ${{github.workspace}}/mcrl2-tools.tgz --clobber
